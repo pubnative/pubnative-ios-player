@@ -18,13 +18,18 @@
 - (void)vastPlayer:(PNVASTPlayerViewController*)vastPlayer didFailLoadingWithError:(NSError*)error;
 - (void)vastPlayerDidStartPlaying:(PNVASTPlayerViewController*)vastPlayer;
 - (void)vastPlayerDidPause:(PNVASTPlayerViewController*)vastPlayer;
+- (void)vastPlayerDidComplete:(PNVASTPlayerViewController*)vastPlayer;
 
 @end
 
 @interface PNVASTPlayerViewController : UIViewController
 
-@property (nonatomic, strong) NSObject<PNVASTPlayerViewControllerDelegate> *delegate;
+@property (nonatomic, assign) NSTimeInterval                                loadTimeout;
+@property (nonatomic, strong) NSObject<PNVASTPlayerViewControllerDelegate>  *delegate;
 
 - (void)loadWithVastUrl:(NSURL*)url;
+- (void)play;
+- (void)pause;
+- (void)stop;
 
 @end

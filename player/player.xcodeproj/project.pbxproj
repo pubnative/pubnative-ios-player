@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B42846B11E55FC15003D9669 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B42846B01E55FC15003D9669 /* main.m */; };
+		B42846B41E55FC15003D9669 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B42846B31E55FC15003D9669 /* AppDelegate.m */; };
+		B42846B71E55FC15003D9669 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B42846B61E55FC15003D9669 /* ViewController.m */; };
+		B42846BA1E55FC15003D9669 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42846B81E55FC15003D9669 /* Main.storyboard */; };
+		B42846BC1E55FC15003D9669 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B42846BB1E55FC15003D9669 /* Assets.xcassets */; };
+		B42846BF1E55FC15003D9669 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B42846BD1E55FC15003D9669 /* LaunchScreen.storyboard */; };
+		B42846C61E55FC32003D9669 /* libplayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B4F376331E4A136100D8ED9C /* libplayer.a */; };
+		B42846CC1E560149003D9669 /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B4AEDD041E4A17E600DCB3EB /* libxml2.tbd */; };
 		B4AEDD091E4A193F00DCB3EB /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4AEDD081E4A193F00DCB3EB /* SystemConfiguration.framework */; };
 		B4AEDD0B1E4A194300DCB3EB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4AEDD0A1E4A194300DCB3EB /* Foundation.framework */; };
 		B4AEDD0D1E4A195000DCB3EB /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4AEDD0C1E4A195000DCB3EB /* CoreFoundation.framework */; };
@@ -25,6 +33,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B42846C41E55FC2D003D9669 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4F3762B1E4A136000D8ED9C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4F376321E4A136000D8ED9C;
+			remoteInfo = player;
+		};
 		B4AEDD2A1E4B743700DCB3EB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B4F3762B1E4A136000D8ED9C /* Project object */;
@@ -47,6 +62,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B42846AD1E55FC14003D9669 /* player.demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = player.demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B42846B01E55FC15003D9669 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B42846B21E55FC15003D9669 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		B42846B31E55FC15003D9669 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		B42846B51E55FC15003D9669 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		B42846B61E55FC15003D9669 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		B42846B91E55FC15003D9669 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B42846BB1E55FC15003D9669 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B42846BE1E55FC15003D9669 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B42846C01E55FC15003D9669 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B4AEDD041E4A17E600DCB3EB /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		B4AEDD061E4A17FE00DCB3EB /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
 		B4AEDD081E4A193F00DCB3EB /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -79,6 +104,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		B42846AA1E55FC14003D9669 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B42846CC1E560149003D9669 /* libxml2.tbd in Frameworks */,
+				B42846C61E55FC32003D9669 /* libplayer.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B4AEDD211E4B743700DCB3EB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -102,6 +136,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B42846AE1E55FC15003D9669 /* player.demo */ = {
+			isa = PBXGroup;
+			children = (
+				B42846B21E55FC15003D9669 /* AppDelegate.h */,
+				B42846B31E55FC15003D9669 /* AppDelegate.m */,
+				B42846B51E55FC15003D9669 /* ViewController.h */,
+				B42846B61E55FC15003D9669 /* ViewController.m */,
+				B42846B81E55FC15003D9669 /* Main.storyboard */,
+				B42846BB1E55FC15003D9669 /* Assets.xcassets */,
+				B42846BD1E55FC15003D9669 /* LaunchScreen.storyboard */,
+				B42846C01E55FC15003D9669 /* Info.plist */,
+				B42846AF1E55FC15003D9669 /* Supporting Files */,
+			);
+			path = player.demo;
+			sourceTree = "<group>";
+		};
+		B42846AF1E55FC15003D9669 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B42846B01E55FC15003D9669 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		B4AEDD031E4A17E600DCB3EB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -131,6 +189,7 @@
 			children = (
 				B4F376351E4A136100D8ED9C /* player */,
 				B4AEDD251E4B743700DCB3EB /* player.test */,
+				B42846AE1E55FC15003D9669 /* player.demo */,
 				B4F376341E4A136100D8ED9C /* Products */,
 				B4AEDD031E4A17E600DCB3EB /* Frameworks */,
 			);
@@ -141,6 +200,7 @@
 			children = (
 				B4F376331E4A136100D8ED9C /* libplayer.a */,
 				B4AEDD241E4B743700DCB3EB /* player.test.xctest */,
+				B42846AD1E55FC14003D9669 /* player.demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -188,6 +248,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		B42846AC1E55FC14003D9669 /* player.demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B42846C31E55FC15003D9669 /* Build configuration list for PBXNativeTarget "player.demo" */;
+			buildPhases = (
+				B42846A91E55FC14003D9669 /* Sources */,
+				B42846AA1E55FC14003D9669 /* Frameworks */,
+				B42846AB1E55FC14003D9669 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B42846C51E55FC2D003D9669 /* PBXTargetDependency */,
+			);
+			name = player.demo;
+			productName = player.demo;
+			productReference = B42846AD1E55FC14003D9669 /* player.demo.app */;
+			productType = "com.apple.product-type.application";
+		};
 		B4AEDD231E4B743700DCB3EB /* player.test */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4AEDD2C1E4B743700DCB3EB /* Build configuration list for PBXNativeTarget "player.test" */;
@@ -232,6 +310,11 @@
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = pubnative;
 				TargetAttributes = {
+					B42846AC1E55FC14003D9669 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = J6V7N93E53;
+						ProvisioningStyle = Automatic;
+					};
 					B4AEDD231E4B743700DCB3EB = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = J6V7N93E53;
@@ -250,6 +333,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = B4F3762A1E4A136000D8ED9C;
 			productRefGroup = B4F376341E4A136100D8ED9C /* Products */;
@@ -258,11 +342,22 @@
 			targets = (
 				B4F376321E4A136000D8ED9C /* player */,
 				B4AEDD231E4B743700DCB3EB /* player.test */,
+				B42846AC1E55FC14003D9669 /* player.demo */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B42846AB1E55FC14003D9669 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B42846BF1E55FC15003D9669 /* LaunchScreen.storyboard in Resources */,
+				B42846BC1E55FC15003D9669 /* Assets.xcassets in Resources */,
+				B42846BA1E55FC15003D9669 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B4AEDD221E4B743700DCB3EB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -273,6 +368,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		B42846A91E55FC14003D9669 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B42846B71E55FC15003D9669 /* ViewController.m in Sources */,
+				B42846B41E55FC15003D9669 /* AppDelegate.m in Sources */,
+				B42846B11E55FC15003D9669 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B4AEDD201E4B743700DCB3EB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -299,6 +404,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		B42846C51E55FC2D003D9669 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4F376321E4A136000D8ED9C /* player */;
+			targetProxy = B42846C41E55FC2D003D9669 /* PBXContainerItemProxy */;
+		};
 		B4AEDD2B1E4B743700DCB3EB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B4F376321E4A136000D8ED9C /* player */;
@@ -306,7 +416,52 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		B42846B81E55FC15003D9669 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B42846B91E55FC15003D9669 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		B42846BD1E55FC15003D9669 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B42846BE1E55FC15003D9669 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		B42846C11E55FC15003D9669 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = J6V7N93E53;
+				INFOPLIST_FILE = player.demo/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "net.pubnative.player-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B42846C21E55FC15003D9669 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = J6V7N93E53;
+				INFOPLIST_FILE = player.demo/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "net.pubnative.player-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		B4AEDD2D1E4B743700DCB3EB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -448,6 +603,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		B42846C31E55FC15003D9669 /* Build configuration list for PBXNativeTarget "player.demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B42846C11E55FC15003D9669 /* Debug */,
+				B42846C21E55FC15003D9669 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		B4AEDD2C1E4B743700DCB3EB /* Build configuration list for PBXNativeTarget "player.test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -455,6 +618,7 @@
 				B4AEDD2E1E4B743700DCB3EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B4F3762E1E4A136000D8ED9C /* Build configuration list for PBXProject "player" */ = {
 			isa = XCConfigurationList;

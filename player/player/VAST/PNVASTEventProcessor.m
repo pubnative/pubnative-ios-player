@@ -38,7 +38,6 @@
 - (void)trackEvent:(PNVASTEvent)event
 {
     NSString *eventString = nil;
-    
     switch (event) {
         case PNVASTEvent_Start:           eventString = @"start";           break;
         case PNVASTEvent_FirstQuartile:   eventString = @"firstQuartile";   break;
@@ -50,16 +49,13 @@
         case PNVASTEvent_Resume:          eventString = @"resume";          break;
         default: break;
     }
-    
     [self invokeDidTrackEvent:event];
-    
     if(eventString == nil) {
         [self invokeDidTrackEvent:PNVASTEvent_Unknown];
     } else {
-        
-        for (NSURL *aURL in self.events[eventString]) {
-            [self sendTrackingRequest:aURL];
-            NSLog(@"VAST - Event Processor: Sent event '%@' to url: %@", eventString, [aURL absoluteString]);
+        for (NSURL *eventUrl in self.events[eventString]) {
+            [self sendTrackingRequest:eventUrl];
+            NSLog(@"VAST - Event Processor: Sent event '%@' to url: %@", eventString, [eventUrl absoluteString]);
         }
     }
 }
