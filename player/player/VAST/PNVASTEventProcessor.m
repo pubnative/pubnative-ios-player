@@ -67,7 +67,7 @@
     }
 }
 
-- (void)sendVASTUrlsWithId:(NSArray *)urls
+- (void)sendVASTUrls:(NSArray *)urls
 {
     for (NSURL *url in urls) {
         [self sendTrackingRequest:url];

@@ -11,6 +11,13 @@
 #import "PNVASTModel.h"
 #import "PNVASTMediaFilePicker.h"
 #import "PNVASTEventProcessor.h"
+#import "PNProgressLabel.h"
+
+NSString * const kPNVASTPlayerBundleName = @"player.resources";
+NSString * const kPNVASTPlayerMuteImageName = @"PnMute";
+NSString * const kPNVASTPlayerUnMuteImageName = @"PnUnMute";
+NSString * const kPNVASTPlayerFullScreenImageName = @"PnFullScreen";
+NSString * const kPNVASTPlayerOpenImageName = @"PNExternalLink";
 
 NSTimeInterval const kPNVASTPlayerDefaultLoadTimeout        = 20.0f;
 NSTimeInterval const kPNVASTPlayerDefaultPlaybackInterval   = 0.25f;
@@ -33,15 +40,22 @@ typedef enum : NSUInteger {
 @interface PNVASTPlayerViewController ()<PNVASTEventProcessorDelegate>
 
 @property (nonatomic, assign) BOOL                      shown;
+@property (nonatomic, assign) BOOL                      isMute;
 @property (nonatomic, assign) PNVastPlayerState         currentState;
 @property (nonatomic, assign) PNVastPlaybackState       playback;
 @property (nonatomic, strong) NSURL                     *vastUrl;
 @property (nonatomic, strong) PNVASTModel               *vastModel;
 @property (nonatomic, strong) PNVASTParser              *parser;
 @property (nonatomic, strong) PNVASTEventProcessor      *eventProcessor;
+
 @property (nonatomic, strong) MPMoviePlayerController   *player;
 @property (nonatomic, strong) NSTimer                   *loadTimer;
 @property (nonatomic, strong) NSTimer                   *playbackTimer;
+
+@property (weak, nonatomic) IBOutlet UIButton *btnMute;
+@property (weak, nonatomic) IBOutlet UIButton *btnOpenOffer;
+@property (weak, nonatomic) IBOutlet UIButton *btnFullscreen;
+@property (weak, nonatomic) IBOutlet UIView *viewProgress;
 
 @end
 
@@ -49,7 +63,9 @@ typedef enum : NSUInteger {
 
 - (instancetype)init
 {
-    self = [super init];
+    NSBundle *bundle = [self getBundle];
+    self = [super initWithNibName:NSStringFromClass([self class])
+                           bundle:bundle];
     if (self) {
         self.state = PNVastPlayerState_IDLE;
         self.playback = PNVastPlaybackState_FirstQuartile;
@@ -57,10 +73,59 @@ typedef enum : NSUInteger {
     return self;
 }
 
-- (void)loadView
+- (void)viewDidLoad
 {
-    self.view = [[UIView alloc] init];
-    self.view.backgroundColor = [UIColor blackColor];
+    [self.btnMute setImage:[self bundledImageNamed:@"PnUnMute"] forState:UIControlStateNormal];
+    [self.btnOpenOffer setImage:[self bundledImageNamed:@"PNExternalLink"] forState:UIControlStateNormal];
+    [self.btnFullscreen setImage:[self bundledImageNamed:@"PnFullScreen"] forState:UIControlStateNormal];
+    self.player.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    self.view.backgroundColor = [UIColor yellowColor];
+    [self.view addSubview:self.player.view];
+    [self.view sendSubviewToBack:self.player.view];
+}
+
+- (UIImage*)bundledImageNamed:(NSString*)name
+{
+    NSBundle *bundle = [self getBundle];
+    // If image combination is enabled
+    NSString *imagePath = [bundle pathForResource:name ofType:@"tiff"];
+    // If nil, let's try to get the regular PNG
+    if(imagePath == nil) {
+        imagePath = [bundle pathForResource:name ofType:@"png"];
+    }
+    return [UIImage imageWithContentsOfFile:imagePath];
+}
+
+- (NSBundle*)getBundle
+{
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:kPNVASTPlayerBundleName ofType:@"bundle"];
+    return [NSBundle bundleWithPath:bundlePath];
+}
+
+- (IBAction)btnMutePush:(id)sender {
+    
+    NSLog(@"btnMutePush");
+    
+    NSString *imageName = self.isMute ? @"PnUnMute" : @"PnMute";
+    UIImage *newImage = [self bundledImageNamed:imageName];
+    [self.btnMute setImage:newImage forState:UIControlStateNormal];
+    
+    // TODO: Actual mute sound
+    
+    self.isMute = !self.isMute;
+}
+
+- (IBAction)btnOpenOfferPush:(id)sender {
+    NSLog(@"btnOpenOfferPush");
+    NSArray *clickTrackingUrls = [self.vastModel clickTracking];
+    if (clickTrackingUrls != nil && [clickTrackingUrls count] > 0) {
+        [self.eventProcessor sendVASTUrls:clickTrackingUrls];
+    }
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.vastModel clickThrough]]];
+}
+
+- (IBAction)btnFullscreenPush:(id)sender {
+    NSLog(@"btnFullscreenPush");
 }
 
 - (void)dealloc
@@ -142,11 +207,10 @@ typedef enum : NSUInteger {
         if(self.player == nil) {
             self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];
             self.player.view.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-            [self.view addSubview:self.player.view];
-            self.view.autoresizesSubviews = YES;
             self.player.controlStyle = MPMovieControlStyleNone;
             self.player.shouldAutoplay = NO;
             self.player.fullscreen = NO;
+            self.player.view.backgroundColor = [UIColor redColor];
         }
         
         [self.player prepareToPlay];
@@ -370,7 +434,7 @@ typedef enum : NSUInteger {
 {
     NSLog(@"VASTPlayer - Sending Error requests");
     if(self.vastModel && [self.vastModel errors] != nil) {
-        [self.eventProcessor sendVASTUrlsWithId:[self.vastModel errors]];
+        [self.eventProcessor sendVASTUrls:[self.vastModel errors]];
     }
 }
 

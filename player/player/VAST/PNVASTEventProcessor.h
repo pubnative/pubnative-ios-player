@@ -38,6 +38,6 @@ typedef enum : NSInteger {
 // sends the given VASTEvent
 - (void)trackEvent:(PNVASTEvent)event;
 // sends the set of http requests to supplied URLs, used for Impressions, ClickTracking, and Errors.
-- (void)sendVASTUrlsWithId:(NSArray *)url;
+- (void)sendVASTUrls:(NSArray *)url;
 
 @end
