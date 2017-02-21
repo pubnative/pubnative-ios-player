@@ -34,9 +34,9 @@
 		B4DF2CD71E5AFB5100B0F15A /* PnUnMute.png in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CBF1E5AFACF00B0F15A /* PnUnMute.png */; };
 		B4DF2CD81E5AFB5100B0F15A /* PnUnMute@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CC01E5AFACF00B0F15A /* PnUnMute@2x.png */; };
 		B4DF2CD91E5AFB6B00B0F15A /* player.resources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CC51E5AFAFA00B0F15A /* player.resources.bundle */; };
-		B4DF2CDF1E5B104A00B0F15A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4DF2CDE1E5B104A00B0F15A /* AVFoundation.framework */; };
 		B4DF2CE01E5B15D300B0F15A /* PNVASTPlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CDC1E5B008A00B0F15A /* PNVASTPlayerViewController.xib */; };
 		B4DF2CE11E5B276600B0F15A /* PNVASTPlayerViewController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = B4AEDD161E4B31E900DCB3EB /* PNVASTPlayerViewController.h */; };
+		B4DF2CE31E5B536000B0F15A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4DF2CDE1E5B104A00B0F15A /* AVFoundation.framework */; };
 		B4F3765A1E4A139000D8ED9C /* PNVASTMediaFile.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F376421E4A139000D8ED9C /* PNVASTMediaFile.m */; };
 		B4F3765B1E4A139000D8ED9C /* PNVASTModel.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F376441E4A139000D8ED9C /* PNVASTModel.m */; };
 		B4F3765D1E4A139000D8ED9C /* PNVASTParser.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F3764A1E4A139000D8ED9C /* PNVASTParser.m */; };
@@ -176,7 +176,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4DF2CDF1E5B104A00B0F15A /* AVFoundation.framework in Frameworks */,
+				B4DF2CE31E5B536000B0F15A /* AVFoundation.framework in Frameworks */,
 				B4AEDD151E4B287800DCB3EB /* UIKit.framework in Frameworks */,
 				B4AEDD0D1E4A195000DCB3EB /* CoreFoundation.framework in Frameworks */,
 				B4AEDD0B1E4A194300DCB3EB /* Foundation.framework in Frameworks */,

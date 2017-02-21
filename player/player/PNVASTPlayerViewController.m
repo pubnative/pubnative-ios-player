@@ -13,6 +13,7 @@
 #import "PNVASTEventProcessor.h"
 #import "PNProgressLabel.h"
 
+NSString * const kPNVASTPlayerStatusKeyPath = @"status";
 NSString * const kPNVASTPlayerBundleName = @"player.resources";
 NSString * const kPNVASTPlayerMuteImageName = @"PnMute";
 NSString * const kPNVASTPlayerUnMuteImageName = @"PnUnMute";
@@ -39,19 +40,22 @@ typedef enum : NSUInteger {
 
 @interface PNVASTPlayerViewController ()<PNVASTEventProcessorDelegate>
 
-@property (nonatomic, assign) BOOL                      shown;
-@property (nonatomic, assign) BOOL                      isMute;
-@property (nonatomic, assign) PNVastPlayerState         currentState;
-@property (nonatomic, assign) PNVastPlaybackState       playback;
-@property (nonatomic, strong) NSURL                     *vastUrl;
-@property (nonatomic, strong) PNVASTModel               *vastModel;
-@property (nonatomic, strong) PNVASTParser              *parser;
-@property (nonatomic, strong) PNVASTEventProcessor      *eventProcessor;
-
-@property (nonatomic, strong) MPMoviePlayerController   *player;
-@property (nonatomic, strong) NSTimer                   *loadTimer;
-@property (nonatomic, strong) NSTimer                   *playbackTimer;
-
+@property (nonatomic, assign) BOOL                  shown;
+@property (nonatomic, assign) BOOL                  readyToPlay;
+@property (nonatomic, assign) BOOL                  muted;
+@property (nonatomic, assign) PNVastPlayerState     currentState;
+@property (nonatomic, assign) PNVastPlaybackState   playback;
+@property (nonatomic, strong) NSURL                 *vastUrl;
+@property (nonatomic, strong) PNVASTModel           *vastModel;
+@property (nonatomic, strong) PNVASTParser          *parser;
+@property (nonatomic, strong) PNVASTEventProcessor  *eventProcessor;
+@property (nonatomic, strong) NSTimer               *loadTimer;
+@property (nonatomic, strong) id                    playbackToken;
+// Player
+@property (nonatomic, strong) AVPlayer              *player;
+@property (nonatomic, strong) AVPlayerItem          *playerItem;
+@property (nonatomic, strong) AVPlayerLayer         *layer;
+// IBOutlets
 @property (weak, nonatomic) IBOutlet UIButton *btnMute;
 @property (weak, nonatomic) IBOutlet UIButton *btnOpenOffer;
 @property (weak, nonatomic) IBOutlet UIButton *btnFullscreen;
@@ -61,71 +65,17 @@ typedef enum : NSUInteger {
 
 @implementation PNVASTPlayerViewController
 
+#pragma mark NSObject
+
 - (instancetype)init
 {
-    NSBundle *bundle = [self getBundle];
-    self = [super initWithNibName:NSStringFromClass([self class])
-                           bundle:bundle];
+    self = [super initWithNibName:NSStringFromClass([self class]) bundle:[self getBundle]];
     if (self) {
         self.state = PNVastPlayerState_IDLE;
         self.playback = PNVastPlaybackState_FirstQuartile;
+        self.muted = YES;
     }
     return self;
-}
-
-- (void)viewDidLoad
-{
-    [self.btnMute setImage:[self bundledImageNamed:@"PnUnMute"] forState:UIControlStateNormal];
-    [self.btnOpenOffer setImage:[self bundledImageNamed:@"PNExternalLink"] forState:UIControlStateNormal];
-    [self.btnFullscreen setImage:[self bundledImageNamed:@"PnFullScreen"] forState:UIControlStateNormal];
-    self.player.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
-    self.view.backgroundColor = [UIColor yellowColor];
-    [self.view addSubview:self.player.view];
-    [self.view sendSubviewToBack:self.player.view];
-}
-
-- (UIImage*)bundledImageNamed:(NSString*)name
-{
-    NSBundle *bundle = [self getBundle];
-    // If image combination is enabled
-    NSString *imagePath = [bundle pathForResource:name ofType:@"tiff"];
-    // If nil, let's try to get the regular PNG
-    if(imagePath == nil) {
-        imagePath = [bundle pathForResource:name ofType:@"png"];
-    }
-    return [UIImage imageWithContentsOfFile:imagePath];
-}
-
-- (NSBundle*)getBundle
-{
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:kPNVASTPlayerBundleName ofType:@"bundle"];
-    return [NSBundle bundleWithPath:bundlePath];
-}
-
-- (IBAction)btnMutePush:(id)sender {
-    
-    NSLog(@"btnMutePush");
-    
-    NSString *imageName = self.isMute ? @"PnUnMute" : @"PnMute";
-    UIImage *newImage = [self bundledImageNamed:imageName];
-    [self.btnMute setImage:newImage forState:UIControlStateNormal];
-    
-    // TODO: Actual mute sound
-    
-    self.isMute = !self.isMute;
-}
-
-- (IBAction)btnOpenOfferPush:(id)sender {
-    NSLog(@"btnOpenOfferPush");
-    NSArray *clickTrackingUrls = [self.vastModel clickTracking];
-    if (clickTrackingUrls != nil && [clickTrackingUrls count] > 0) {
-        [self.eventProcessor sendVASTUrls:clickTrackingUrls];
-    }
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.vastModel clickThrough]]];
-}
-
-- (IBAction)btnFullscreenPush:(id)sender {
-    NSLog(@"btnFullscreenPush");
 }
 
 - (void)dealloc
@@ -133,9 +83,32 @@ typedef enum : NSUInteger {
     [self close];
 }
 
+#pragma mark UIViewController
+
+- (void)viewDidLoad
+{
+    [self.btnMute setImage:[self bundledImageNamed:@"PnMute"] forState:UIControlStateNormal];
+    [self.btnOpenOffer setImage:[self bundledImageNamed:@"PNExternalLink"] forState:UIControlStateNormal];
+    [self.btnFullscreen setImage:[self bundledImageNamed:@"PnFullScreen"] forState:UIControlStateNormal];
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
     self.shown = YES;
+    [self initLayer];
+}
+
+- (void)initLayer
+{
+    if (self.layer == nil) {
+        self.layer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+        self.layer.videoGravity = AVLayerVideoGravityResizeAspect;
+    }
+    if(self.shown) {
+        CGRect viewRect = self.view.bounds;
+        self.layer.frame = viewRect;
+        [self.view.layer insertSublayer:self.layer atIndex:0];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -176,23 +149,37 @@ typedef enum : NSUInteger {
 
 #pragma mark - PRIVATE -
 
+- (UIImage*)bundledImageNamed:(NSString*)name
+{
+    NSBundle *bundle = [self getBundle];
+    // Try getting the regular PNG
+    NSString *imagePath = [bundle pathForResource:name ofType:@"png"];
+    // If nil, let's try to get the combined TIFF, JIC it's enabled
+    if(imagePath == nil) {
+        imagePath = [bundle pathForResource:name ofType:@"tiff"];
+    }
+    return [UIImage imageWithContentsOfFile:imagePath];
+}
+
+- (NSBundle*)getBundle
+{
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:kPNVASTPlayerBundleName ofType:@"bundle"];
+    return [NSBundle bundleWithPath:bundlePath];
+}
+
 - (void)close
 {
     @synchronized (self) {
         [self removeObservers];
         [self stopLoadTimeoutTimer];
-        [self stopPlaybackTimer];
         if(self.shown) {
             [self.eventProcessor trackEvent:PNVASTEvent_Close];
         }
-        @try {
-            [self.player stop];
-            self.player = nil;
-        }
-        
-        @catch (NSException *exception) {
-            NSLog(@"PNVASTPlayer - exception ocurred when closing the player - %@", exception);
-        }
+        [self.player pause];
+        [self.layer removeFromSuperlayer];
+        self.layer = nil;
+        self.playerItem = nil;
+        self.player = nil;
         self.vastUrl = nil;
         self.vastModel = nil;
         self.parser = nil;
@@ -202,30 +189,148 @@ typedef enum : NSUInteger {
 
 - (void)createVideoPlayerWithVideoUrl:(NSURL*)url
 {
-    @try {
-        
-        if(self.player == nil) {
-            self.player = [[MPMoviePlayerController alloc] initWithContentURL:url];
-            self.player.view.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-            self.player.controlStyle = MPMovieControlStyleNone;
-            self.player.shouldAutoplay = NO;
-            self.player.fullscreen = NO;
-            self.player.view.backgroundColor = [UIColor redColor];
-        }
-        
-        [self.player prepareToPlay];
-        
-    } @catch (NSException *exception) {
-        NSLog(@"PNVASTPlayer - Exception ocurred when creating the video player: %@", exception);
-        [self close];
-        [self setState:PNVastPlayerState_IDLE];
+    [self addObservers];
+    // Create asset to be played
+    AVAsset *asset = [AVAsset assetWithURL:url];
+    NSArray *assetKeys = @[@"playable"];
+    
+    // Create a new AVPlayerItem with the asset and an
+    // array of asset keys to be automatically loaded
+    self.playerItem = [AVPlayerItem playerItemWithAsset:asset automaticallyLoadedAssetKeys:assetKeys];
+    
+    // Register as an observer of the player item's status property
+    [self.playerItem addObserver:self
+                      forKeyPath:kPNVASTPlayerStatusKeyPath
+                         options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+                         context:&_playerItem];
+    
+    self.player = [AVPlayer playerWithPlayerItem:self.playerItem];
+    self.player.volume = 0;
+    self.player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    __weak typeof(self) weakSelf = self;
+    CMTime interval = CMTimeMakeWithSeconds(kPNVASTPlayerDefaultPlaybackInterval, NSEC_PER_SEC);
+    self.playbackToken = [self.player addPeriodicTimeObserverForInterval:interval
+                                                                   queue:nil
+                                                              usingBlock:^(CMTime time) {
+                                                                  [weakSelf onPlaybackProgressTick];
+                                                              }];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSString *,id> *)change
+                       context:(void *)context {
+    
+    // Only handle observations for the PlayerItemContext
+    if (context != &_playerItem) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
     }
+    
+    if ([keyPath isEqualToString:@"status"]) {
+        AVPlayerItemStatus status = AVPlayerItemStatusUnknown;
+        // Get the status change from the change dictionary
+        NSNumber *statusNumber = change[NSKeyValueChangeNewKey];
+        if ([statusNumber isKindOfClass:[NSNumber class]]) {
+            status = statusNumber.integerValue;
+        }
+        // Switch over the status
+        switch (status) {
+            case AVPlayerItemStatusReadyToPlay:
+                // Ready to Play
+                [self initLayer];
+                [self setState:PNVastPlayerState_READY];
+                [self invokeDidFinishLoading];
+                break;
+            case AVPlayerItemStatusFailed:
+                [self setState:PNVastPlayerState_IDLE];
+                [self invokeDidFailLoadingWithError:self.playerItem.error];
+                break;
+            case AVPlayerItemStatusUnknown:
+                // Not ready
+                break;
+        }
+    }
+}
+
+- (void)onPlaybackProgressTick
+{
+    Float64 currentPlayedPercent = [self currentPlaybackTime] / [self duration];
+    
+    // TODO: Update ProgressLabel with current time
+    
+    switch (self.playback) {
+        case PNVastPlaybackState_FirstQuartile:
+        {
+            if (currentPlayedPercent>0.25f) {
+                [self.eventProcessor trackEvent:PNVASTEvent_FirstQuartile];
+                self.playback = PNVastPlaybackState_SecondQuartile;
+            }
+        }
+        break;
+        case PNVastPlaybackState_SecondQuartile:
+        {
+            if (currentPlayedPercent>0.50f) {
+                [self.eventProcessor trackEvent:PNVASTEvent_Midpoint];
+                self.playback = PNVastPlaybackState_ThirdQuartile;
+            }
+        }
+        break;
+        case PNVastPlaybackState_ThirdQuartile:
+        {
+            if (currentPlayedPercent>0.75f) {
+                [self.eventProcessor trackEvent:PNVASTEvent_ThirdQuartile];
+                self.playback = PNVastPlaybackState_FourthQuartile;
+            }
+        }
+        break;
+        default: break;
+    }
+}
+
+- (Float64)duration
+{
+    AVPlayerItem *currentItem = self.player.currentItem;
+    return CMTimeGetSeconds([currentItem duration]);
+}
+
+- (Float64)currentPlaybackTime
+{
+    AVPlayerItem *currentItem = self.player.currentItem;
+    return CMTimeGetSeconds([currentItem currentTime]);
+}
+
+#pragma mark IBActions
+
+- (IBAction)btnMutePush:(id)sender {
+    
+    NSLog(@"btnMutePush");
+    self.muted = !self.muted;
+    NSString *newImageName = self.muted ? @"PnMute" : @"PnUnMute";
+    UIImage *newImage = [self bundledImageNamed:newImageName];
+    [self.btnMute setImage:newImage forState:UIControlStateNormal];
+    CGFloat newVolume = self.muted?0.0f:1.0f;
+    self.player.volume = newVolume;
+}
+
+- (IBAction)btnOpenOfferPush:(id)sender {
+    NSLog(@"btnOpenOfferPush");
+    NSArray *clickTrackingUrls = [self.vastModel clickTracking];
+    if (clickTrackingUrls != nil && [clickTrackingUrls count] > 0) {
+        [self.eventProcessor sendVASTUrls:clickTrackingUrls];
+    }
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self.vastModel clickThrough]]];
+}
+
+- (IBAction)btnFullscreenPush:(id)sender {
+    NSLog(@"btnFullscreenPush");
 }
 
 #pragma mark - Delegate helpers
 
 - (void)invokeDidFinishLoading
 {
+    self.readyToPlay = YES;
     [self stopLoadTimeoutTimer];
     if([self.delegate respondsToSelector:@selector(vastPlayerDidFinishLoading:)]) {
         [self.delegate vastPlayerDidFinishLoading:self];
@@ -262,7 +367,7 @@ typedef enum : NSUInteger {
     }
 }
 
-#pragma mark - MPMoviePlayer notifications
+#pragma mark - AVPlayer notifications
 
 - (void)addObservers
 {
@@ -270,85 +375,40 @@ typedef enum : NSUInteger {
                                              selector: @selector(applicationDidBecomeActive:)
                                                  name: UIApplicationDidBecomeActiveNotification
                                                object: nil];
-    
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerMovieDurationAvailable:)
-                                                 name:MPMovieDurationAvailableNotification
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerMoviePlayBackDidFinish:)
-                                                 name:MPMoviePlayerPlaybackDidFinishNotification
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerPlaybackStateDidChangeNotification:)
-                                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerLoadStateDidChanged:)
-                                                 name:MPMoviePlayerLoadStateDidChangeNotification
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerSourceTypeAvailable:)
-                                                 name:MPMovieSourceTypeAvailableNotification
-                                               object:nil];
-    #pragma clang diagnostic pop
+                                             selector:@selector(moviePlayBackDidFinish:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:self.player];
 }
 
 - (void)removeObservers
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
+    if(self.player != nil) {
+        [self.playerItem removeObserver:self forKeyPath:kPNVASTPlayerStatusKeyPath];
+        [self.player removeTimeObserver:self.playbackToken];
+    }
     
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackStateDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMovieDurationAvailableNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMovieSourceTypeAvailableNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerLoadStateDidChangeNotification object:nil];
-    #pragma clang diagnostic pop
+    [[NSNotificationCenter defaultCenter] removeObserver:self];;
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)notification
 {
-    
-}
-
-- (void)playerMovieDurationAvailable:(NSNotification*)notification
-{
-    NSLog(@"VAST - Movie duration available %f", self.player.duration);
-}
-
-- (void)playerMoviePlayBackDidFinish:(NSNotification*)notification
-{
-    NSLog(@"VAST - Movie finish playing");
-    [self.eventProcessor trackEvent:PNVASTEvent_Complete];
-    [self setState:PNVastPlayerState_IDLE];
-    [self invokeDidComplete];
-}
-
-- (void)playerPlaybackStateDidChangeNotification:(NSNotification*)notification
-{
-    NSLog(@"VAST - Movie playback state changed");
-}
-
-- (void)playerLoadStateDidChanged:(NSNotification*)notification
-{
-    NSLog(@"VAST - Movie load state changed");
-    if (self.player.loadState == (MPMovieLoadStatePlayable|MPMovieLoadStatePlaythroughOK))
-    {
-        [self setState:PNVastPlayerState_READY];
+    if(self.currentState == PNVastPlayerState_PLAY) {
+        [self.player play];
     }
 }
 
-- (void)playerSourceTypeAvailable:(NSNotification*)notification
+- (void)moviePlayBackDidFinish:(NSNotification*)notification
 {
-    NSLog(@"VAST - Movie source type available");
+    [self.eventProcessor trackEvent:PNVASTEvent_Complete];
+    
+    [self.player pause];
+    [self.layer removeFromSuperlayer];
+    [self.playerItem seekToTime:kCMTimeZero];
+    
+    [self setState:PNVastPlayerState_READY];
+    [self invokeDidComplete];
 }
 
 #pragma mark - State Machine
@@ -360,7 +420,7 @@ typedef enum : NSUInteger {
     switch (state) {
         case PNVastPlayerState_IDLE:    result = YES; break;
         case PNVastPlayerState_LOAD:    result = self.currentState & PNVastPlayerState_IDLE; break;
-        case PNVastPlayerState_READY:   result = self.currentState & PNVastPlayerState_LOAD; break;
+        case PNVastPlayerState_READY:   result = self.currentState & (PNVastPlayerState_PLAY|PNVastPlayerState_LOAD); break;
         case PNVastPlayerState_PLAY:    result = self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE); break;
         case PNVastPlayerState_PAUSE:   result = self.currentState & PNVastPlayerState_PLAY; break;
         default: break;
@@ -393,12 +453,15 @@ typedef enum : NSUInteger {
 
 - (void)setLoadState
 {
+    self.readyToPlay = NO;
     NSLog(@"PNVastPlayer - setLoadState");
+    
     if (self.vastUrl == nil) {
+    
         NSLog(@"PNVastPlayer - setLoadState error: VAST url is nil and required");
         [self setState:PNVastPlayerState_IDLE];
+    
     } else {
-        [self addObservers];
         
         if (self.parser == nil) {
             self.parser = [[PNVASTParser alloc] init];
@@ -447,37 +510,21 @@ typedef enum : NSUInteger {
 - (void)setPlayState
 {
     NSLog(@"PNVastPlayer - setPlayState");
-    
-    @try {
-        [self.player play];
-        
-        if(self.player.currentPlaybackTime > 0) {
-            [self.eventProcessor trackEvent:PNVASTEvent_Resume];
-        } else {
-            [self.eventProcessor trackEvent:PNVASTEvent_Start];
-        }
-        
-        [self startPlaybackTimer];
-        [self invokeDidStartPlaying];
-    } @catch (NSException *exception) {
-        NSLog(@"PNVASTPlayer - Exception ocurred when starting playback: %@", exception);
-        [self setState:PNVastPlayerState_IDLE];
+    [self.player play];
+    if([self currentPlaybackTime]  > 0) {
+        [self.eventProcessor trackEvent:PNVASTEvent_Resume];
+    } else {
+        [self.eventProcessor trackEvent:PNVASTEvent_Start];
     }
-    
+    [self invokeDidStartPlaying];
 }
 
 - (void)setPauseState
 {
     NSLog(@"PNVastPlayer - setPauseState");
-    
-    @try {
-        [self.player pause];
-        [self.eventProcessor trackEvent:PNVASTEvent_Pause];
-        [self invokeDidPause];
-    } @catch (NSException *exception) {
-        NSLog(@"PNVASTPlayer - Exception ocurred when pausig playback: %@", exception);
-        [self setState:PNVastPlayerState_IDLE];
-    }
+    [self.player pause];
+    [self.eventProcessor trackEvent:PNVASTEvent_Pause];
+    [self invokeDidPause];
 }
 
 #pragma mark - TIMERS -
@@ -510,63 +557,6 @@ typedef enum : NSUInteger {
     [self close];
     NSError *error = [NSError errorWithDomain:@"VASTPlayer - video load timeout" code:0 userInfo:nil];
     [self invokeDidFailLoadingWithError:error];
-}
-
-#pragma mark Playback timer
-
-- (void)startPlaybackTimer
-{
-    @synchronized (self) {
-        [self stopPlaybackTimer];
-        self.playbackTimer = [NSTimer scheduledTimerWithTimeInterval:kPNVASTPlayerDefaultPlaybackInterval
-                                                             target:self
-                                                            selector:@selector(playbackTick)
-                                                           userInfo:nil
-                                                            repeats:YES];
-    }
-}
-
-- (void)stopPlaybackTimer
-{
-    [self.playbackTimer invalidate];
-    self.playbackTimer = nil;
-}
-
-- (void)playbackTick
-{
-    // TODO: Hang test?
-    
-    CGFloat currentPlayedPercent = self.player.currentPlaybackTime / self.player.duration;
-    
-    // TODO: Update spin
-    
-    switch (self.playback) {
-        case PNVastPlaybackState_FirstQuartile:
-        {
-            if (currentPlayedPercent>0.25f) {
-                [self.eventProcessor trackEvent:PNVASTEvent_FirstQuartile];
-                self.playback = PNVastPlaybackState_SecondQuartile;
-            }
-        }
-        break;
-        case PNVastPlaybackState_SecondQuartile:
-        {
-            if (currentPlayedPercent>0.50f) {
-                [self.eventProcessor trackEvent:PNVASTEvent_Midpoint];
-                self.playback = PNVastPlaybackState_ThirdQuartile;
-            }
-        }
-        break;
-        case PNVastPlaybackState_ThirdQuartile:
-        {
-            if (currentPlayedPercent>0.75f) {
-                [self.eventProcessor trackEvent:PNVASTEvent_ThirdQuartile];
-                self.playback = PNVastPlaybackState_FourthQuartile;
-            }
-        }
-        break;
-        default: break;
-    }
 }
 
 #pragma mark - CALLBACKS -

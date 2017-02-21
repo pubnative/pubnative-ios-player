@@ -23,7 +23,7 @@
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AdU-PQ-h8D">
                                 <rect key="frame" x="0.0" y="577" width="375" height="30"/>
-                                <state key="normal" title="Toogle"/>
+                                <state key="normal" title="play"/>
                                 <connections>
                                     <action selector="toogle:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vod-TI-RbL"/>
                                 </connections>

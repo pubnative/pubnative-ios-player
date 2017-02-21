@@ -12,6 +12,7 @@
 @interface ViewController () <PNVASTPlayerViewControllerDelegate>
 
 @property (nonatomic, strong) PNVASTPlayerViewController *player;
+@property (weak, nonatomic) IBOutlet UIButton *btnToggle;
 
 @end
 
@@ -40,14 +41,26 @@
 
 - (IBAction)toogle:(id)sender {
     
-    static BOOL playing = true;
+    static BOOL playing = NO;
     
     if(playing) {
+        [self setTogglePlay];
         [self.player pause];
     } else {
+        [self setTogglePause];
         [self.player play];
     }
     playing = !playing;
+}
+
+- (void)setTogglePlay
+{
+    [self.btnToggle setTitle:@"play" forState:UIControlStateNormal];
+}
+
+- (void)setTogglePause
+{
+    [self.btnToggle setTitle:@"pause" forState:UIControlStateNormal];
 }
 
 - (IBAction)close:(id)sender {
@@ -61,9 +74,8 @@
 - (void)vastPlayerDidFinishLoading:(PNVASTPlayerViewController*)vastPlayer
 {
     NSLog(@"vastPlayerDidFinishLoading:");
-    self.player.view.frame = CGRectMake(0, 0, 250, 180);
+    self.player.view.frame = CGRectMake(0, 0, self.view.frame.size.width, 200);
     [self.view addSubview:self.player.view];
-    [self.player play];
 }
 
 - (void)vastPlayer:(PNVASTPlayerViewController*)vastPlayer didFailLoadingWithError:(NSError*)error
@@ -79,6 +91,12 @@
 - (void)vastPlayerDidPause:(PNVASTPlayerViewController*)vastPlayer
 {
     NSLog(@"vastPlayerDidPause:");
+}
+
+-(void)vastPlayerDidComplete:(PNVASTPlayerViewController *)vastPlayer
+{
+    NSLog(@"vastPlayerDidComplete:");
+    [self setTogglePlay];
 }
 
 
