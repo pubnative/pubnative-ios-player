@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import "PNVASTPlayerViewController.h"
 
+NSString * const kDefaultVASTURL = @"https://dl.dropboxusercontent.com/u/2709335/test.vast";
+
 @interface ViewController () <PNVASTPlayerViewControllerDelegate>
 
 @property (nonatomic, strong) PNVASTPlayerViewController *player;
@@ -30,7 +32,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     self.player = [[PNVASTPlayerViewController alloc] init];
     self.player.delegate = self;
-    self.textViewURL.text = @"https://dl.dropboxusercontent.com/u/2709335/test.vast";
+    self.textViewURL.text = kDefaultVASTURL;
 }
 
 static BOOL playing = NO;

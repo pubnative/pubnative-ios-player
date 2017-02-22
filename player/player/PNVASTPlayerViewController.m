@@ -103,7 +103,6 @@ typedef enum : NSUInteger {
     [self.btnMute setImage:[self bundledImageNamed:@"PnMute"] forState:UIControlStateNormal];
     [self.btnOpenOffer setImage:[self bundledImageNamed:@"PNExternalLink"] forState:UIControlStateNormal];
     [self.btnFullscreen setImage:[self bundledImageNamed:@"PnFullScreen"] forState:UIControlStateNormal];
-    self.progressLabel = [[PNProgressLabel alloc] initWithFrame:self.viewProgress.bounds];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -159,6 +158,8 @@ typedef enum : NSUInteger {
         }
         [self.player pause];
         [self.layer removeFromSuperlayer];
+        [self.progressLabel removeFromSuperview];
+        self.progressLabel = nil;
         self.layer = nil;
         self.playerItem = nil;
         self.player = nil;
@@ -257,9 +258,12 @@ typedef enum : NSUInteger {
 
 - (void)onPlaybackProgressTick
 {
-    Float64 currentPlayedPercent = [self currentPlaybackTime] / [self duration];
+    Float64 currentDuration = [self duration];
+    Float64 currentPlaybackTime = [self currentPlaybackTime];
+    Float64 currentPlayedPercent = currentPlaybackTime / currentDuration;
     
-    // TODO: Update ProgressLabel with current time
+    [self.progressLabel setProgress:currentPlayedPercent];
+    self.progressLabel.text = [NSString stringWithFormat:@"%.f", currentDuration - currentPlaybackTime];
     
     switch (self.playback) {
         case PNVastPlaybackState_FirstQuartile:
@@ -436,6 +440,9 @@ typedef enum : NSUInteger {
 - (void)moviePlayBackDidFinish:(NSNotification*)notification
 {
     [self.eventProcessor trackEvent:PNVASTEvent_Complete];
+    if(self.fullScreen) {
+        [self btnFullscreenPush:self.btnFullscreen];
+    }
     [self.player pause];
     [self.playerItem seekToTime:kCMTimeZero];
     [self setState:PNVastPlayerState_READY];
@@ -554,6 +561,26 @@ typedef enum : NSUInteger {
         self.layer.frame = self.view.bounds;
         [self.view.layer insertSublayer:self.layer atIndex:0];
     }
+    
+    if(self.progressLabel == nil) {
+        self.progressLabel = [[PNProgressLabel alloc] initWithFrame:self.viewProgress.bounds];
+        self.progressLabel.frame = self.viewProgress.bounds;
+        self.progressLabel.borderWidth = 6.0;
+        self.progressLabel.colorTable = @{
+                                          NSStringFromProgressLabelColorTableKey(ProgressLabelTrackColor):[UIColor clearColor],
+                                          NSStringFromProgressLabelColorTableKey(ProgressLabelProgressColor):[UIColor whiteColor],
+                                          NSStringFromProgressLabelColorTableKey(ProgressLabelFillColor):[UIColor clearColor]
+                                         };
+        self.progressLabel.textColor = [UIColor whiteColor];
+        self.progressLabel.shadowColor = [UIColor darkGrayColor];
+        self.progressLabel.shadowOffset = CGSizeMake(1, 1);
+        self.progressLabel.textAlignment = NSTextAlignmentCenter;
+        self.progressLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
+        
+        [self.progressLabel setProgress:0.0f];
+        [self.viewProgress addSubview:self.progressLabel];
+    }
+    self.progressLabel.text = @"0";
 }
 
 - (void)setPlayState
