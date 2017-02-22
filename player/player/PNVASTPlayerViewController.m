@@ -41,8 +41,8 @@ typedef enum : NSUInteger {
 @interface PNVASTPlayerViewController ()<PNVASTEventProcessorDelegate>
 
 @property (nonatomic, assign) BOOL                  shown;
-@property (nonatomic, assign) BOOL                  readyToPlay;
 @property (nonatomic, assign) BOOL                  muted;
+@property (nonatomic, assign) BOOL                  fullScreen;
 @property (nonatomic, assign) PNVastPlayerState     currentState;
 @property (nonatomic, assign) PNVastPlaybackState   playback;
 @property (nonatomic, strong) NSURL                 *vastUrl;
@@ -51,15 +51,20 @@ typedef enum : NSUInteger {
 @property (nonatomic, strong) PNVASTEventProcessor  *eventProcessor;
 @property (nonatomic, strong) NSTimer               *loadTimer;
 @property (nonatomic, strong) id                    playbackToken;
+// Fullscreen
+@property (nonatomic, strong) UIView                *viewContainer;
+@property (nonatomic, assign) CGRect                containedFrame;
 // Player
 @property (nonatomic, strong) AVPlayer              *player;
 @property (nonatomic, strong) AVPlayerItem          *playerItem;
 @property (nonatomic, strong) AVPlayerLayer         *layer;
+@property (nonatomic, strong) PNProgressLabel       *progressLabel;
 // IBOutlets
-@property (weak, nonatomic) IBOutlet UIButton *btnMute;
-@property (weak, nonatomic) IBOutlet UIButton *btnOpenOffer;
-@property (weak, nonatomic) IBOutlet UIButton *btnFullscreen;
-@property (weak, nonatomic) IBOutlet UIView *viewProgress;
+@property (weak, nonatomic) IBOutlet UIButton                   *btnMute;
+@property (weak, nonatomic) IBOutlet UIButton                   *btnOpenOffer;
+@property (weak, nonatomic) IBOutlet UIButton                   *btnFullscreen;
+@property (weak, nonatomic) IBOutlet UIView                     *viewProgress;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView    *loadingSpin;
 
 @end
 
@@ -74,6 +79,7 @@ typedef enum : NSUInteger {
         self.state = PNVastPlayerState_IDLE;
         self.playback = PNVastPlaybackState_FirstQuartile;
         self.muted = YES;
+        self.canResize = YES;
     }
     return self;
 }
@@ -85,30 +91,24 @@ typedef enum : NSUInteger {
 
 #pragma mark UIViewController
 
+- (void)viewWillLayoutSubviews
+{
+    if(self.layer) {
+        self.layer.frame = self.view.bounds;
+    }
+}
+
 - (void)viewDidLoad
 {
     [self.btnMute setImage:[self bundledImageNamed:@"PnMute"] forState:UIControlStateNormal];
     [self.btnOpenOffer setImage:[self bundledImageNamed:@"PNExternalLink"] forState:UIControlStateNormal];
     [self.btnFullscreen setImage:[self bundledImageNamed:@"PnFullScreen"] forState:UIControlStateNormal];
+    self.progressLabel = [[PNProgressLabel alloc] initWithFrame:self.viewProgress.bounds];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     self.shown = YES;
-    [self initLayer];
-}
-
-- (void)initLayer
-{
-    if (self.layer == nil) {
-        self.layer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-        self.layer.videoGravity = AVLayerVideoGravityResizeAspect;
-    }
-    if(self.shown) {
-        CGRect viewRect = self.view.bounds;
-        self.layer.frame = viewRect;
-        [self.view.layer insertSublayer:self.layer atIndex:0];
-    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -149,24 +149,6 @@ typedef enum : NSUInteger {
 
 #pragma mark - PRIVATE -
 
-- (UIImage*)bundledImageNamed:(NSString*)name
-{
-    NSBundle *bundle = [self getBundle];
-    // Try getting the regular PNG
-    NSString *imagePath = [bundle pathForResource:name ofType:@"png"];
-    // If nil, let's try to get the combined TIFF, JIC it's enabled
-    if(imagePath == nil) {
-        imagePath = [bundle pathForResource:name ofType:@"tiff"];
-    }
-    return [UIImage imageWithContentsOfFile:imagePath];
-}
-
-- (NSBundle*)getBundle
-{
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:kPNVASTPlayerBundleName ofType:@"bundle"];
-    return [NSBundle bundleWithPath:bundlePath];
-}
-
 - (void)close
 {
     @synchronized (self) {
@@ -184,7 +166,26 @@ typedef enum : NSUInteger {
         self.vastModel = nil;
         self.parser = nil;
         self.eventProcessor = nil;
+        self.viewContainer = nil;
     }
+}
+
+- (UIImage*)bundledImageNamed:(NSString*)name
+{
+    NSBundle *bundle = [self getBundle];
+    // Try getting the regular PNG
+    NSString *imagePath = [bundle pathForResource:name ofType:@"png"];
+    // If nil, let's try to get the combined TIFF, JIC it's enabled
+    if(imagePath == nil) {
+        imagePath = [bundle pathForResource:name ofType:@"tiff"];
+    }
+    return [UIImage imageWithContentsOfFile:imagePath];
+}
+
+- (NSBundle*)getBundle
+{
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:kPNVASTPlayerBundleName ofType:@"bundle"];
+    return [NSBundle bundleWithPath:bundlePath];
 }
 
 - (void)createVideoPlayerWithVideoUrl:(NSURL*)url
@@ -222,12 +223,14 @@ typedef enum : NSUInteger {
                        context:(void *)context {
     
     // Only handle observations for the PlayerItemContext
-    if (context != &_playerItem) {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-        return;
-    }
     
-    if ([keyPath isEqualToString:@"status"]) {
+    if (context != &_playerItem) {
+        
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        
+    } else if ([keyPath isEqualToString:@"status"]
+               && self.currentState == PNVastPlayerState_LOAD) {
+        
         AVPlayerItemStatus status = AVPlayerItemStatusUnknown;
         // Get the status change from the change dictionary
         NSNumber *statusNumber = change[NSKeyValueChangeNewKey];
@@ -238,7 +241,6 @@ typedef enum : NSUInteger {
         switch (status) {
             case AVPlayerItemStatusReadyToPlay:
                 // Ready to Play
-                [self initLayer];
                 [self setState:PNVastPlayerState_READY];
                 [self invokeDidFinishLoading];
                 break;
@@ -300,6 +302,14 @@ typedef enum : NSUInteger {
     return CMTimeGetSeconds([currentItem currentTime]);
 }
 
+- (void)trackError
+{
+    NSLog(@"VASTPlayer - Sending Error requests");
+    if(self.vastModel && [self.vastModel errors] != nil) {
+        [self.eventProcessor sendVASTUrls:[self.vastModel errors]];
+    }
+}
+
 #pragma mark IBActions
 
 - (IBAction)btnMutePush:(id)sender {
@@ -314,6 +324,7 @@ typedef enum : NSUInteger {
 }
 
 - (IBAction)btnOpenOfferPush:(id)sender {
+    
     NSLog(@"btnOpenOfferPush");
     NSArray *clickTrackingUrls = [self.vastModel clickTracking];
     if (clickTrackingUrls != nil && [clickTrackingUrls count] > 0) {
@@ -323,14 +334,37 @@ typedef enum : NSUInteger {
 }
 
 - (IBAction)btnFullscreenPush:(id)sender {
+    
     NSLog(@"btnFullscreenPush");
+    
+    self.fullScreen = !self.fullScreen;
+    if (self.fullScreen) {
+
+        self.viewContainer = self.view.superview;
+        self.containedFrame = self.view.frame;
+        [self.view removeFromSuperview];
+        
+        UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
+        if(presentingController.presentedViewController)
+        {
+            presentingController = presentingController.presentedViewController;
+        }
+        
+        self.view.frame = presentingController.view.frame;
+        [presentingController.view addSubview:self.view];
+        
+    } else {
+        
+        [self.view removeFromSuperview];
+        self.view.frame = self.containedFrame;
+        [self.viewContainer addSubview:self.view];
+    }
 }
 
 #pragma mark - Delegate helpers
 
 - (void)invokeDidFinishLoading
 {
-    self.readyToPlay = YES;
     [self stopLoadTimeoutTimer];
     if([self.delegate respondsToSelector:@selector(vastPlayerDidFinishLoading:)]) {
         [self.delegate vastPlayerDidFinishLoading:self];
@@ -402,11 +436,8 @@ typedef enum : NSUInteger {
 - (void)moviePlayBackDidFinish:(NSNotification*)notification
 {
     [self.eventProcessor trackEvent:PNVASTEvent_Complete];
-    
     [self.player pause];
-    [self.layer removeFromSuperlayer];
     [self.playerItem seekToTime:kCMTimeZero];
-    
     [self setState:PNVastPlayerState_READY];
     [self invokeDidComplete];
 }
@@ -421,8 +452,8 @@ typedef enum : NSUInteger {
         case PNVastPlayerState_IDLE:    result = YES; break;
         case PNVastPlayerState_LOAD:    result = self.currentState & PNVastPlayerState_IDLE; break;
         case PNVastPlayerState_READY:   result = self.currentState & (PNVastPlayerState_PLAY|PNVastPlayerState_LOAD); break;
-        case PNVastPlayerState_PLAY:    result = self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE); break;
-        case PNVastPlayerState_PAUSE:   result = self.currentState & PNVastPlayerState_PLAY; break;
+        case PNVastPlayerState_PLAY:    result = (self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE)) && self.shown; break;
+        case PNVastPlayerState_PAUSE:   result = (self.currentState & PNVastPlayerState_PLAY) && self.shown; break;
         default: break;
     }
     
@@ -448,13 +479,27 @@ typedef enum : NSUInteger {
 - (void)setIdleState
 {
     NSLog(@"PNVastPlayer - setIdleState");
+    
+    self.loadingSpin.hidden = YES;
+    self.btnMute.hidden = YES;
+    self.btnOpenOffer.hidden = YES;
+    self.btnFullscreen.hidden = YES;
+    self.viewProgress.hidden = YES;
+    [self.loadingSpin stopAnimating];
+    
     [self close];
 }
 
 - (void)setLoadState
 {
-    self.readyToPlay = NO;
     NSLog(@"PNVastPlayer - setLoadState");
+    
+    self.loadingSpin.hidden = NO;
+    self.btnMute.hidden = YES;
+    self.btnOpenOffer.hidden = YES;
+    self.btnFullscreen.hidden = YES;
+    self.viewProgress.hidden = YES;
+    [self.loadingSpin startAnimating];
     
     if (self.vastUrl == nil) {
     
@@ -493,23 +538,36 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void)trackError
-{
-    NSLog(@"VASTPlayer - Sending Error requests");
-    if(self.vastModel && [self.vastModel errors] != nil) {
-        [self.eventProcessor sendVASTUrls:[self.vastModel errors]];
-    }
-}
-
 - (void)setReadyState
 {
     NSLog(@"PNVastPlayer - setReadyState");
-    [self invokeDidFinishLoading];
+    self.loadingSpin.hidden = YES;
+    self.btnMute.hidden = YES;
+    self.btnOpenOffer.hidden = YES;
+    self.btnFullscreen.hidden = YES;
+    self.viewProgress.hidden = YES;
+    self.loadingSpin.hidden = YES;
+    
+    if(self.layer == nil) {
+        self.layer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+        self.layer.videoGravity = AVLayerVideoGravityResizeAspect;
+        self.layer.frame = self.view.bounds;
+        [self.view.layer insertSublayer:self.layer atIndex:0];
+    }
 }
 
 - (void)setPlayState
 {
     NSLog(@"PNVastPlayer - setPlayState");
+    
+    self.loadingSpin.hidden = YES;
+    self.btnMute.hidden = NO;
+    self.btnOpenOffer.hidden = NO;
+    self.btnFullscreen.hidden = !self.canResize;
+    self.viewProgress.hidden = NO;
+    [self.loadingSpin stopAnimating];
+    
+    // Start playback
     [self.player play];
     if([self currentPlaybackTime]  > 0) {
         [self.eventProcessor trackEvent:PNVASTEvent_Resume];
@@ -522,6 +580,14 @@ typedef enum : NSUInteger {
 - (void)setPauseState
 {
     NSLog(@"PNVastPlayer - setPauseState");
+    
+    self.loadingSpin.hidden = YES;
+    self.btnMute.hidden = NO;
+    self.btnOpenOffer.hidden = NO;
+    self.btnFullscreen.hidden = !self.canResize;
+    self.viewProgress.hidden = NO;
+    [self.loadingSpin stopAnimating];
+    
     [self.player pause];
     [self.eventProcessor trackEvent:PNVASTEvent_Pause];
     [self invokeDidPause];

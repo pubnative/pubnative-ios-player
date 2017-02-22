@@ -14,6 +14,7 @@
                 <outlet property="btnFullscreen" destination="hIP-8P-gl0" id="GFz-vr-J29"/>
                 <outlet property="btnMute" destination="JZO-c6-3ys" id="liG-Ev-Qap"/>
                 <outlet property="btnOpenOffer" destination="BXT-cI-oP0" id="ZLh-bh-B8y"/>
+                <outlet property="loadingSpin" destination="KcA-ff-Pj9" id="F6m-XB-pYL"/>
                 <outlet property="view" destination="iN0-l3-epB" id="3yE-Da-NoG"/>
                 <outlet property="viewProgress" destination="49M-ci-rbZ" id="1Jh-8U-c7w"/>
             </connections>
@@ -23,37 +24,64 @@
             <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BXT-cI-oP0">
-                    <rect key="frame" x="550" y="0.0" width="49" height="50"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BXT-cI-oP0">
+                    <rect key="frame" x="550" y="0.0" width="50" height="50"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="4nT-CJ-3uW"/>
+                        <constraint firstAttribute="width" constant="50" id="oJZ-1r-tse"/>
+                    </constraints>
                     <state key="normal" image="PNExternalLink.png"/>
                     <connections>
                         <action selector="btnOpenOfferPush:" destination="-1" eventType="touchUpInside" id="CUr-b7-yxl"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JZO-c6-3ys">
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JZO-c6-3ys">
                     <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="Jh5-ok-g8S"/>
+                        <constraint firstAttribute="width" constant="50" id="R27-O9-Y3D"/>
+                    </constraints>
                     <state key="normal" image="PnMute.png"/>
                     <connections>
                         <action selector="btnMutePush:" destination="-1" eventType="touchUpInside" id="gNk-K7-8oZ"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hIP-8P-gl0">
-                    <rect key="frame" x="550" y="549" width="49" height="51"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hIP-8P-gl0">
+                    <rect key="frame" x="551" y="549" width="49" height="51"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="49" id="T4e-uk-Qo4"/>
+                        <constraint firstAttribute="height" constant="51" id="sQs-Zd-W6n"/>
+                    </constraints>
                     <state key="normal" image="PnFullScreen.png"/>
                     <connections>
                         <action selector="btnFullscreenPush:" destination="-1" eventType="touchUpInside" id="1nf-jc-aPh"/>
                     </connections>
                 </button>
-                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="49M-ci-rbZ">
-                    <rect key="frame" x="0.0" y="549" width="50" height="51"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="49M-ci-rbZ">
+                    <rect key="frame" x="0.0" y="550" width="50" height="50"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="9GR-cG-1m4"/>
+                        <constraint firstAttribute="width" constant="50" id="Cg6-ZO-yO2"/>
+                    </constraints>
                 </view>
+                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="KcA-ff-Pj9">
+                    <rect key="frame" x="281" y="281" width="37" height="37"/>
+                </activityIndicatorView>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="JZO-c6-3ys" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="9a7-S0-hpY"/>
+                <constraint firstAttribute="bottom" secondItem="hIP-8P-gl0" secondAttribute="bottom" id="LeI-0S-g0V"/>
+                <constraint firstItem="KcA-ff-Pj9" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="Mer-61-0eN"/>
+                <constraint firstAttribute="trailing" secondItem="hIP-8P-gl0" secondAttribute="trailing" id="Mt5-Yg-TgJ"/>
+                <constraint firstAttribute="trailing" secondItem="BXT-cI-oP0" secondAttribute="trailing" id="Pua-ps-kWz"/>
+                <constraint firstItem="BXT-cI-oP0" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="T9P-Na-Hxq"/>
+                <constraint firstItem="KcA-ff-Pj9" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="fRf-Cc-YJf"/>
+                <constraint firstItem="49M-ci-rbZ" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="mth-fP-AO3"/>
+                <constraint firstAttribute="bottom" secondItem="49M-ci-rbZ" secondAttribute="bottom" id="pdA-EK-GLh"/>
+                <constraint firstItem="JZO-c6-3ys" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="xiv-Ml-Prs"/>
+            </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
         </view>
     </objects>

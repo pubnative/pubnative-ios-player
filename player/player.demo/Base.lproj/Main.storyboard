@@ -21,16 +21,45 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vd1-hf-o8m">
+                                <rect key="frame" x="0.0" y="66" width="375" height="30"/>
+                                <color key="backgroundColor" red="0.3411764706" green="0.0" blue="0.36078431370000003" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="load">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="loadPushed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wX7-u6-tyw"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Place here your VAST URL to test" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="T54-8Q-gxp">
+                                <rect key="frame" x="0.0" y="28" width="375" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ncp-4B-702">
+                                <rect key="frame" x="0.0" y="104" width="375" height="479"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AdU-PQ-h8D">
-                                <rect key="frame" x="0.0" y="577" width="375" height="30"/>
-                                <state key="normal" title="play"/>
+                                <rect key="frame" x="0.0" y="591" width="375" height="30"/>
+                                <color key="backgroundColor" red="0.3411764706" green="0.0" blue="0.36078431370000003" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="play">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
                                 <connections>
                                     <action selector="toogle:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vod-TI-RbL"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9vb-BT-dlB">
-                                <rect key="frame" x="0.0" y="617" width="375" height="30"/>
-                                <state key="normal" title="Close"/>
+                                <rect key="frame" x="0.0" y="629" width="375" height="30"/>
+                                <color key="backgroundColor" red="0.3411764706" green="0.0" blue="0.36078431370000003" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="close">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
                                 <connections>
                                     <action selector="close:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ZdY-nT-lnk"/>
                                 </connections>
@@ -38,17 +67,33 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="9vb-BT-dlB" firstAttribute="top" secondItem="AdU-PQ-h8D" secondAttribute="bottom" constant="10" id="GBp-co-d2f"/>
-                            <constraint firstItem="AdU-PQ-h8D" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="MI6-9u-VHv"/>
-                            <constraint firstItem="9vb-BT-dlB" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="eJf-sE-Wj8"/>
-                            <constraint firstAttribute="trailing" secondItem="9vb-BT-dlB" secondAttribute="trailing" id="l5t-1Y-i2w"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="9vb-BT-dlB" secondAttribute="bottom" constant="20" id="wqa-AH-v7Y"/>
-                            <constraint firstAttribute="trailing" secondItem="AdU-PQ-h8D" secondAttribute="trailing" id="xa4-uN-z4x"/>
+                            <constraint firstAttribute="trailing" secondItem="9vb-BT-dlB" secondAttribute="trailing" id="0q7-cY-rhU"/>
+                            <constraint firstItem="AdU-PQ-h8D" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="5ze-vD-gYq"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="9vb-BT-dlB" secondAttribute="bottom" constant="8" id="9oO-tQ-7TV"/>
+                            <constraint firstItem="T54-8Q-gxp" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="Brr-B0-lPW"/>
+                            <constraint firstAttribute="trailing" secondItem="Ncp-4B-702" secondAttribute="trailing" id="Cl6-Kx-CmA"/>
+                            <constraint firstAttribute="trailing" secondItem="T54-8Q-gxp" secondAttribute="trailing" id="O2z-rs-EX3"/>
+                            <constraint firstItem="T54-8Q-gxp" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="PGu-cA-tbq"/>
+                            <constraint firstItem="Ncp-4B-702" firstAttribute="top" secondItem="Vd1-hf-o8m" secondAttribute="bottom" constant="8" id="SEp-c8-FtE"/>
+                            <constraint firstItem="Vd1-hf-o8m" firstAttribute="top" secondItem="T54-8Q-gxp" secondAttribute="bottom" constant="8" id="ZTV-O9-53M"/>
+                            <constraint firstAttribute="trailing" secondItem="Vd1-hf-o8m" secondAttribute="trailing" id="d9d-B9-ami"/>
+                            <constraint firstItem="9vb-BT-dlB" firstAttribute="top" secondItem="AdU-PQ-h8D" secondAttribute="bottom" constant="8" id="efY-PI-wRh"/>
+                            <constraint firstItem="9vb-BT-dlB" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="f2B-Kc-EDR"/>
+                            <constraint firstItem="AdU-PQ-h8D" firstAttribute="top" secondItem="Ncp-4B-702" secondAttribute="bottom" constant="8" id="keL-1U-vQq"/>
+                            <constraint firstItem="Vd1-hf-o8m" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="wjL-f2-n75"/>
+                            <constraint firstAttribute="trailing" secondItem="AdU-PQ-h8D" secondAttribute="trailing" id="xRu-Ps-cni"/>
+                            <constraint firstItem="Ncp-4B-702" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="za0-qI-Z9M"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="btnToggle" destination="AdU-PQ-h8D" id="0xC-w0-UNz"/>
+                        <outlet property="textViewURL" destination="T54-8Q-gxp" id="BtP-dC-0D5"/>
+                        <outlet property="videoContainer" destination="Ncp-4B-702" id="eNk-AR-Dq0"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="32.799999999999997" y="38.23088455772114"/>
         </scene>
     </scenes>
 </document>

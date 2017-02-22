@@ -24,6 +24,7 @@
 @interface PNVASTPlayerViewController : UIViewController
 
 @property (nonatomic, assign) NSTimeInterval                                loadTimeout;
+@property (nonatomic, assign) BOOL                                          canResize;
 @property (nonatomic, strong) NSObject<PNVASTPlayerViewControllerDelegate>  *delegate;
 
 - (void)loadWithVastUrl:(NSURL*)url;

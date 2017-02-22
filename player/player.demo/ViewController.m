@@ -13,6 +13,8 @@
 
 @property (nonatomic, strong) PNVASTPlayerViewController *player;
 @property (weak, nonatomic) IBOutlet UIButton *btnToggle;
+@property (weak, nonatomic) IBOutlet UIView *videoContainer;
+@property (weak, nonatomic) IBOutlet UITextField *textViewURL;
 
 @end
 
@@ -26,22 +28,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
-    NSURL *vastURL = [NSURL URLWithString:@"https://dl.dropboxusercontent.com/u/2709335/test.vast"];
     self.player = [[PNVASTPlayerViewController alloc] init];
     self.player.delegate = self;
-    [self.player loadWithVastUrl:vastURL];
-} 
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    self.textViewURL.text = @"https://dl.dropboxusercontent.com/u/2709335/test.vast";
 }
 
+static BOOL playing = NO;
+
 - (IBAction)toogle:(id)sender {
-    
-    static BOOL playing = NO;
     
     if(playing) {
         [self setTogglePlay];
@@ -68,14 +62,25 @@
     [self.player stop];
 }
 
+- (IBAction)loadPushed:(id)sender {
+    
+    [self.player stop];
+    [self.player.view removeFromSuperview];
+    
+    if(self.textViewURL.text != nil) {
+        NSURL *url = [NSURL URLWithString:self.textViewURL.text];
+        [self.player loadWithVastUrl:url];
+        self.player.view.frame = self.videoContainer.bounds;
+        [self.videoContainer addSubview:self.player.view];
+    }
+}
+
 #pragma mark -CALLBACKS-
 #pragma mark PNVASTPlayerViewControllerDelegate
 
 - (void)vastPlayerDidFinishLoading:(PNVASTPlayerViewController*)vastPlayer
 {
     NSLog(@"vastPlayerDidFinishLoading:");
-    self.player.view.frame = CGRectMake(0, 0, self.view.frame.size.width, 200);
-    [self.view addSubview:self.player.view];
 }
 
 - (void)vastPlayer:(PNVASTPlayerViewController*)vastPlayer didFailLoadingWithError:(NSError*)error
@@ -96,6 +101,7 @@
 -(void)vastPlayerDidComplete:(PNVASTPlayerViewController *)vastPlayer
 {
     NSLog(@"vastPlayerDidComplete:");
+    playing = NO;
     [self setTogglePlay];
 }
 

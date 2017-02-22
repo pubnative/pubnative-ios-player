@@ -37,6 +37,8 @@
 		B4DF2CE01E5B15D300B0F15A /* PNVASTPlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CDC1E5B008A00B0F15A /* PNVASTPlayerViewController.xib */; };
 		B4DF2CE11E5B276600B0F15A /* PNVASTPlayerViewController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = B4AEDD161E4B31E900DCB3EB /* PNVASTPlayerViewController.h */; };
 		B4DF2CE31E5B536000B0F15A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4DF2CDE1E5B104A00B0F15A /* AVFoundation.framework */; };
+		B4DF2CE61E5CA7A300B0F15A /* PNPlay.png in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CE41E5CA7A300B0F15A /* PNPlay.png */; };
+		B4DF2CE71E5CA7A300B0F15A /* PNPlay@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B4DF2CE51E5CA7A300B0F15A /* PNPlay@2x.png */; };
 		B4F3765A1E4A139000D8ED9C /* PNVASTMediaFile.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F376421E4A139000D8ED9C /* PNVASTMediaFile.m */; };
 		B4F3765B1E4A139000D8ED9C /* PNVASTModel.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F376441E4A139000D8ED9C /* PNVASTModel.m */; };
 		B4F3765D1E4A139000D8ED9C /* PNVASTParser.m in Sources */ = {isa = PBXBuildFile; fileRef = B4F3764A1E4A139000D8ED9C /* PNVASTParser.m */; };
@@ -131,6 +133,8 @@
 		B4DF2CCD1E5AFB3400B0F15A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B4DF2CDC1E5B008A00B0F15A /* PNVASTPlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PNVASTPlayerViewController.xib; sourceTree = "<group>"; };
 		B4DF2CDE1E5B104A00B0F15A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		B4DF2CE41E5CA7A300B0F15A /* PNPlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PNPlay.png; sourceTree = "<group>"; };
+		B4DF2CE51E5CA7A300B0F15A /* PNPlay@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PNPlay@2x.png"; sourceTree = "<group>"; };
 		B4F376331E4A136100D8ED9C /* libplayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libplayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4F376411E4A139000D8ED9C /* PNVASTMediaFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PNVASTMediaFile.h; sourceTree = "<group>"; };
 		B4F376421E4A139000D8ED9C /* PNVASTMediaFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PNVASTMediaFile.m; sourceTree = "<group>"; };
@@ -240,6 +244,8 @@
 			isa = PBXGroup;
 			children = (
 				B4DF2CCD1E5AFB3400B0F15A /* Info.plist */,
+				B4DF2CE41E5CA7A300B0F15A /* PNPlay.png */,
+				B4DF2CE51E5CA7A300B0F15A /* PNPlay@2x.png */,
 				B4DF2CB71E5AFACF00B0F15A /* PNExternalLink.png */,
 				B4DF2CB81E5AFACF00B0F15A /* PNExternalLink@2x.png */,
 				B4DF2CB91E5AFACF00B0F15A /* PnFullScreen.png */,
@@ -471,6 +477,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B4DF2CD01E5AFB5100B0F15A /* PNExternalLink@2x.png in Resources */,
+				B4DF2CE61E5CA7A300B0F15A /* PNPlay.png in Resources */,
 				B4DF2CD11E5AFB5100B0F15A /* PnFullScreen.png in Resources */,
 				B4DF2CD21E5AFB5100B0F15A /* PnFullScreen@2x.png in Resources */,
 				B4DF2CE01E5B15D300B0F15A /* PNVASTPlayerViewController.xib in Resources */,
@@ -479,6 +486,7 @@
 				B4DF2CD71E5AFB5100B0F15A /* PnUnMute.png in Resources */,
 				B4DF2CD81E5AFB5100B0F15A /* PnUnMute@2x.png in Resources */,
 				B4DF2CCF1E5AFB4D00B0F15A /* PNExternalLink.png in Resources */,
+				B4DF2CE71E5CA7A300B0F15A /* PNPlay@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -794,6 +802,7 @@
 				B4DF2CCA1E5AFAFB00B0F15A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B4F3762E1E4A136000D8ED9C /* Build configuration list for PBXProject "player" */ = {
 			isa = XCConfigurationList;
