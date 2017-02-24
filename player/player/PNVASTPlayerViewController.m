@@ -27,12 +27,12 @@
 #import "PNVASTEventProcessor.h"
 #import "PNProgressLabel.h"
 
-NSString * const kPNVASTPlayerStatusKeyPath = @"status";
-NSString * const kPNVASTPlayerBundleName = @"player.resources";
-NSString * const kPNVASTPlayerMuteImageName = @"PnMute";
-NSString * const kPNVASTPlayerUnMuteImageName = @"PnUnMute";
-NSString * const kPNVASTPlayerFullScreenImageName = @"PnFullScreen";
-NSString * const kPNVASTPlayerOpenImageName = @"PNExternalLink";
+NSString * const kPNVASTPlayerStatusKeyPath         = @"status";
+NSString * const kPNVASTPlayerBundleName            = @"player.resources";
+NSString * const kPNVASTPlayerMuteImageName         = @"PnMute";
+NSString * const kPNVASTPlayerUnMuteImageName       = @"PnUnMute";
+NSString * const kPNVASTPlayerFullScreenImageName   = @"PnFullScreen";
+NSString * const kPNVASTPlayerOpenImageName         = @"PNExternalLink";
 
 NSTimeInterval const kPNVASTPlayerDefaultLoadTimeout        = 20.0f;
 NSTimeInterval const kPNVASTPlayerDefaultPlaybackInterval   = 0.25f;
@@ -67,7 +67,6 @@ typedef enum : NSUInteger {
 @property (nonatomic, strong) id                    playbackToken;
 // Fullscreen
 @property (nonatomic, strong) UIView                *viewContainer;
-@property (nonatomic, assign) CGRect                containedFrame;
 // Player
 @property (nonatomic, strong) AVPlayer              *player;
 @property (nonatomic, strong) AVPlayerItem          *playerItem;
@@ -359,7 +358,6 @@ typedef enum : NSUInteger {
     if (self.fullScreen) {
 
         self.viewContainer = self.view.superview;
-        self.containedFrame = self.view.frame;
         [self.view removeFromSuperview];
         
         UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
@@ -374,7 +372,7 @@ typedef enum : NSUInteger {
     } else {
         
         [self.view removeFromSuperview];
-        self.view.frame = self.containedFrame;
+        self.view.frame = self.viewContainer.bounds;
         [self.viewContainer addSubview:self.view];
     }
 }
