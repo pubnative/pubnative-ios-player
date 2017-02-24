@@ -55,6 +55,7 @@ typedef enum : NSUInteger {
 @interface PNVASTPlayerViewController ()<PNVASTEventProcessorDelegate>
 
 @property (nonatomic, assign) BOOL                  shown;
+@property (nonatomic, assign) BOOL                  wantsToPlay;
 @property (nonatomic, assign) BOOL                  muted;
 @property (nonatomic, assign) BOOL                  fullScreen;
 @property (nonatomic, assign) PNVastPlayerState     currentState;
@@ -121,6 +122,9 @@ typedef enum : NSUInteger {
 - (void)viewDidAppear:(BOOL)animated
 {
     self.shown = YES;
+    if(self.wantsToPlay) {
+        [self setState:PNVastPlayerState_PLAY];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -471,7 +475,14 @@ typedef enum : NSUInteger {
         case PNVastPlayerState_IDLE:    result = YES; break;
         case PNVastPlayerState_LOAD:    result = self.currentState & PNVastPlayerState_IDLE; break;
         case PNVastPlayerState_READY:   result = self.currentState & (PNVastPlayerState_PLAY|PNVastPlayerState_LOAD); break;
-        case PNVastPlayerState_PLAY:    result = (self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE)) && self.shown; break;
+        case PNVastPlayerState_PLAY:
+        {
+            if ((self.currentState & PNVastPlayerState_READY) && !self.shown) {
+                self.wantsToPlay = YES;
+            }
+            result = (self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE)) && self.shown;
+        }
+        break;
         case PNVastPlayerState_PAUSE:   result = (self.currentState & PNVastPlayerState_PLAY) && self.shown; break;
         default: break;
     }
@@ -504,6 +515,7 @@ typedef enum : NSUInteger {
     self.btnOpenOffer.hidden = YES;
     self.btnFullscreen.hidden = YES;
     self.viewProgress.hidden = YES;
+    self.wantsToPlay = NO;
     [self.loadingSpin stopAnimating];
     
     [self close];
@@ -518,6 +530,7 @@ typedef enum : NSUInteger {
     self.btnOpenOffer.hidden = YES;
     self.btnFullscreen.hidden = YES;
     self.viewProgress.hidden = YES;
+    self.wantsToPlay = NO;
     [self.loadingSpin startAnimating];
     
     if (self.vastUrl == nil) {
@@ -604,6 +617,7 @@ typedef enum : NSUInteger {
     self.btnOpenOffer.hidden = NO;
     self.btnFullscreen.hidden = !self.canResize;
     self.viewProgress.hidden = NO;
+    self.wantsToPlay = NO;
     [self.loadingSpin stopAnimating];
     
     // Start playback
