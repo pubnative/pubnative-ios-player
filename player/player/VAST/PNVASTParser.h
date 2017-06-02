@@ -33,9 +33,11 @@ typedef enum : NSInteger {
 } PNVASTParserError;
 
 @class PNVASTModel;
+typedef void (^vastParserCompletionBlock)(PNVASTModel *, PNVASTParserError);
 
 @interface PNVASTParser : NSObject
 
-- (void)parseWithUrl:(NSURL *)url completion:(void (^)(PNVASTModel *, PNVASTParserError))block;
+- (void)parseWithUrl:(NSURL *)url completion:(vastParserCompletionBlock)block;
+- (void)parseWithData:(NSData *)vastData completion:(vastParserCompletionBlock)block;
 
 @end

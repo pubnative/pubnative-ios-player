@@ -60,7 +60,7 @@ BOOL const kPNVASTModel_ValidateWithSchema = NO;
 
 #pragma mark - "public" methods
 
-- (void)parseWithUrl:(NSURL *)url completion:(void (^)(PNVASTModel *, PNVASTParserError))block
+- (void)parseWithUrl:(NSURL *)url completion:(vastParserCompletionBlock)block
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSData *vastData = [NSData dataWithContentsOfURL:url];
@@ -71,7 +71,7 @@ BOOL const kPNVASTModel_ValidateWithSchema = NO;
     });
 }
 
-- (void)parseWithData:(NSData *)vastData completion:(void (^)(PNVASTModel *, PNVASTParserError))block
+- (void)parseWithData:(NSData *)vastData completion:(vastParserCompletionBlock)block
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         PNVASTParserError vastError = [self parseRecursivelyWithData:vastData depth:0];

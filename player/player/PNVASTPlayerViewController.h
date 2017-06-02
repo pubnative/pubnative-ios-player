@@ -42,6 +42,7 @@
 @property (nonatomic, strong) NSObject<PNVASTPlayerViewControllerDelegate>  *delegate;
 
 - (void)loadWithVastUrl:(NSURL*)url;
+- (void)loadWithVastString:(NSString*)vast;
 - (void)play;
 - (void)pause;
 - (void)stop;

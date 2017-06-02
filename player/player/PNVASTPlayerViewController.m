@@ -61,6 +61,7 @@ typedef enum : NSUInteger {
 @property (nonatomic, assign) PNVastPlayerState     currentState;
 @property (nonatomic, assign) PNVastPlaybackState   playback;
 @property (nonatomic, strong) NSURL                 *vastUrl;
+@property (nonatomic, strong) NSString              *vastString;
 @property (nonatomic, strong) PNVASTModel           *vastModel;
 @property (nonatomic, strong) PNVASTParser          *parser;
 @property (nonatomic, strong) PNVASTEventProcessor  *eventProcessor;
@@ -142,6 +143,14 @@ typedef enum : NSUInteger {
     }
 }
 
+- (void)loadWithVastString:(NSString *)vast
+{
+    @synchronized (self) {
+        self.vastString = vast;
+        [self setState:PNVastPlayerState_LOAD];
+    }
+}
+
 - (void)play
 {
     @synchronized (self) {
@@ -181,6 +190,7 @@ typedef enum : NSUInteger {
         self.playerItem = nil;
         self.player = nil;
         self.vastUrl = nil;
+        self.vastString = nil;
         self.vastModel = nil;
         self.parser = nil;
         self.eventProcessor = nil;
@@ -479,6 +489,7 @@ typedef enum : NSUInteger {
         {
             if ((self.currentState & PNVastPlayerState_READY) && !self.shown) {
                 self.wantsToPlay = YES;
+                NSLog(@"PNVASTPlayer - You're trying to play when the view is not add to the screen, it will be played as soon as the view is add to the screen");
             }
             result = (self.currentState & (PNVastPlayerState_READY|PNVastPlayerState_PAUSE)) && self.shown;
         }
@@ -533,40 +544,50 @@ typedef enum : NSUInteger {
     self.wantsToPlay = NO;
     [self.loadingSpin startAnimating];
     
-    if (self.vastUrl == nil) {
+    if (self.vastUrl == nil && self.vastString == nil) {
     
-        NSLog(@"PNVastPlayer - setLoadState error: VAST url is nil and required");
+        NSLog(@"PNVastPlayer - setLoadState error: VAST is nil and required");
         [self setState:PNVastPlayerState_IDLE];
     
     } else {
-        
+     
         if (self.parser == nil) {
             self.parser = [[PNVASTParser alloc] init];
         }
         
         [self startLoadTimeoutTimer];
+        
         __weak PNVASTPlayerViewController *weakSelf = self;
-        [self.parser parseWithUrl:self.vastUrl
-                       completion:^(PNVASTModel *model, PNVASTParserError error) {
-                           
-           if (model == nil) {
-               NSError *parseError = [NSError errorWithDomain:[NSString stringWithFormat:@"%ld", (long)error]
-                                                         code:0
-                                                     userInfo:nil];
-               [weakSelf invokeDidFailLoadingWithError:parseError];
-           } else {
-               weakSelf.eventProcessor = [[PNVASTEventProcessor alloc] initWithEvents:[model trackingEvents] delegate:self];
-               NSURL *mediaUrl = [PNVASTMediaFilePicker pick:[model mediaFiles]].url;
-               if(mediaUrl == nil) {
-                   NSLog(@"PNVASTPlayer - Error: did not find a compatible mediaFile");
-                   NSError *mediaNotFoundError = [NSError errorWithDomain:@"PNVASTPlayer - Error: Not found compatible media with this device" code:0 userInfo:nil];
-                   [weakSelf invokeDidFailLoadingWithError:mediaNotFoundError];
-               } else {
-                   weakSelf.vastModel = model;
-                   [weakSelf createVideoPlayerWithVideoUrl:mediaUrl];
-               }
+        vastParserCompletionBlock completion = ^(PNVASTModel *model, PNVASTParserError error) {
+            if (model == nil) {
+                NSError *parseError = [NSError errorWithDomain:[NSString stringWithFormat:@"%ld", (long)error]
+                                                          code:0
+                                                      userInfo:nil];
+                [weakSelf invokeDidFailLoadingWithError:parseError];
+            } else {
+                weakSelf.eventProcessor = [[PNVASTEventProcessor alloc] initWithEvents:[model trackingEvents] delegate:self];
+                NSURL *mediaUrl = [PNVASTMediaFilePicker pick:[model mediaFiles]].url;
+                if(mediaUrl == nil) {
+                    NSLog(@"PNVASTPlayerVC - Error: did not find a compatible mediaFile");
+                    NSError *mediaNotFoundError = [NSError errorWithDomain:@"PNVASTPlayerVC - Error: Not found compatible media with this device" code:0 userInfo:nil];
+                    [weakSelf invokeDidFailLoadingWithError:mediaNotFoundError];
+                } else {
+                    weakSelf.vastModel = model;
+                    [weakSelf createVideoPlayerWithVideoUrl:mediaUrl];
+                }
             }
-        }];
+        };
+        
+        if (self.vastUrl != nil) {
+            [self.parser parseWithUrl:self.vastUrl
+                           completion:completion];
+        } else if (self.vastString != nil) {
+            [self.parser parseWithData:[self.vastString dataUsingEncoding:NSUTF8StringEncoding]
+                            completion:completion];
+        } else {
+            NSError *unexpectedError = [NSError errorWithDomain:@"PNVASTPlayerVC - Error: unexpected" code:0 userInfo:nil];
+            [self invokeDidFailLoadingWithError:unexpectedError];
+        }
     }
 }
 
